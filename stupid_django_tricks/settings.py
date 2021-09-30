@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'nested_models',
     'lookup_expr',
     'sql_backed_models',
     'django.contrib.admin',
