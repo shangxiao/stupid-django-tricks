@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'lookup_expr',
+    'sql_backed_models',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
