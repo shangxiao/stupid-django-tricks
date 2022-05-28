@@ -46,11 +46,11 @@ class GenerateIntegerSeries(GenerateSeries):
     series = models.IntegerField(primary_key=True)
 
 
-# Although generate_series() will return sets of type timestamp for both datetimes and
-# date arguments, PostgreSQL has a handy shortcut to access the correct type through the
-# `date` and `timestamp` fields of the returned set. If we wanted to be consistent and use
-# `series` as the field name then we'd need to override models.DateField to convert the
-# returned datetime to a date.
+# Although generate_series() will return sets of type timestamptz for both datetime and
+# date arguments, PostgreSQL has a handy shortcut to access a different type through the
+# `date`, `timestamp` and `timestamptz` fields of the returned set. If we wanted to be
+# consistent and use `series` as the field name then we'd need to override models.DateField
+# to convert the returned datetime to a date.
 
 
 class GenerateDateSeries(GenerateSeries):
@@ -58,4 +58,4 @@ class GenerateDateSeries(GenerateSeries):
 
 
 class GenerateDateTimeSeries(GenerateSeries):
-    timestamp = models.DateTimeField(primary_key=True)
+    timestamptz = models.DateTimeField(primary_key=True)
