@@ -8,6 +8,7 @@ existing_new = ModelBase.__new__
 
 # We're updating the metaclass in order to add this new field
 
+
 def __new__(cls, name, bases, attrs, **kwargs):
     # Be sure to exclude migrations models, which are nested.
     # This is all very hacky of course - one cannot tell what 3rd party apps are added

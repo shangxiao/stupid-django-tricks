@@ -1,5 +1,3 @@
-import functools
-
 from django.db import models
 
 
