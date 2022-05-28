@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "generated_columns",
     "singleton_models",
     "nested_models",
     "lookup_expr",
