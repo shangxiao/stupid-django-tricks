@@ -14,7 +14,7 @@ Integer series from 0 to 10 with an interval of 2:
 <QuerySet [0, 2, 4, 6, 8, 10]>
 ```
 
-Date series from 1st Jan 2021 to 31st Dec 2021 with an interval of 1 month:
+Date series from 1st Jan 2021 to 31st Dec 2021 with an interval of 1 month using a string:
 
 ```python
 > from datetime import date
@@ -34,19 +34,22 @@ Date series from 1st Jan 2021 to 31st Dec 2021 with an interval of 1 month:
     datetime.date(2021, 12, 1)]>
 ```
 
-Datetime series on 1st Jan 2021 from 9:00am to 5:00pm with an interval of 1 hour:
+Datetime series on 1st Jan 2021 from 9:00am to 5:00pm with an interval of 1 hour using timedelta:
 
 ```python
-> from datetime import datetime
-> GenerateDateTimeSeries.objects.all(datetime(2021, 1, 1, 9, 0, 0), datetime(2021, 1, 1, 17, 0, 0), '1 hour').values_list('timestamp', flat=True)
+> from datetime import datetime, timedelta
+> from zoneinfo import ZoneInfo
+> tzinfo = ZoneInfo('Australia/Sydney')
+> GenerateDateTimeSeries.objects.all(datetime(2021, 1, 1, 9, 0, 0, tzinfo=tzinfo), datetime(2021, 1, 1, 17, 0, 0, tzinfo=tzinfo), timedelta(hours=1)).values_list('timestamptz', flat=True)
 <QuerySet [
-    datetime.datetime(2021, 1, 1, 9, 0),
-    datetime.datetime(2021, 1, 1, 10, 0),
-    datetime.datetime(2021, 1, 1, 11, 0),
-    datetime.datetime(2021, 1, 1, 12, 0),
-    datetime.datetime(2021, 1, 1, 13, 0),
-    datetime.datetime(2021, 1, 1, 14, 0),
-    datetime.datetime(2021, 1, 1, 15, 0),
-    datetime.datetime(2021, 1, 1, 16, 0),
-    datetime.datetime(2021, 1, 1, 17, 0)]>
+    datetime.datetime(2020, 12, 31, 22, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2020, 12, 31, 23, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 1, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 2, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 3, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 4, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 5, 0, tzinfo=datetime.timezone.utc),
+    datetime.datetime(2021, 1, 1, 6, 0, tzinfo=datetime.timezone.utc)
+]>
 ```
