@@ -1,0 +1,47 @@
+name: Tests
+
+on: push
+
+jobs:
+  Tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: stupid_django_tricks
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Determine Python version
+        run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Setup virtualenv
+        run: |
+          python3 -m venv ./.venv
+          source .venv/bin/activate
+
+      - name: Install dependencies
+        run: pip install -Ur ./requirements.txt
+
+      - name: Run tests
+        run: pytest
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost/stupid_django_tricks

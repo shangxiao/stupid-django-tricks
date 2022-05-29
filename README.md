@@ -1,5 +1,8 @@
 # stupid-django-tricks
 
+![Tests](https://github.com/shangxiao/stupid-django-tricks/actions/workflows/tests.yml/badge.svg)
+
+
 Various tricks with Django - some silly, some quite useful.
 
 1. [Add attributes to properties](./lookup_expr)
