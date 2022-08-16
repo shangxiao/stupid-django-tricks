@@ -10,3 +10,4 @@ Various tricks with Django - some silly, some quite useful.
 3. [Nested models with implicit parent FK](./nested_models)
 4. [Singleton Models](./singleton_models)
 5. [Generated Columns](./generated_columns)
+6. [ALL Subqueries](./all_subqueries)

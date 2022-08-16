@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "all_subqueries",
     "generated_columns",
     "singleton_models",
     "nested_models",
