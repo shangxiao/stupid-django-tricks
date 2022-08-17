@@ -39,18 +39,16 @@ You can use an ALL subquery to get only groups where all members work for KFC:
 ```
 
 You achieve this in Django by defining a [custom lookup](https://docs.djangoproject.com/en/dev/howto/custom-lookups/)
-that simply includes the `ALL` keyword along with the operator of choice:
+that simply includes the `ALL` keyword along with the operator of choice. In fact any of the lookups using operators
+that can be used in conjunction with ALL can be extended to do this:
 
 ```python
 @Field.register_lookup
-class AllSubqueryLookup(Lookup):
+class All(Exact):
     lookup_name = "all"
 
-    def as_sql(self, compiler, connection):
-        lhs, lhs_params = self.process_lhs(compiler, connection)
-        rhs, rhs_params = self.process_rhs(compiler, connection)
-        params = list(lhs_params) + list(rhs_params)
-        return "%s = ALL %s" % (lhs, rhs), params
+    def get_rhs_op(self, connection, rhs):
+        return connection.operators[super().lookup_name] % f"ALL {rhs}"
 ```
 
 Then it can be used like so:
