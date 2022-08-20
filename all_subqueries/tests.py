@@ -1,5 +1,5 @@
 import pytest
-from django.db.models import OuterRef, Subquery, Value
+from django.db.models import Exists, OuterRef, Subquery, Value
 
 from .models import Employee, GroupsByRestaurant, Score
 
@@ -39,6 +39,16 @@ def test_all_subquery():
 
     assert len(only_groups_where_all_members_are_from_kfc) == 1
     assert only_groups_where_all_members_are_from_kfc[0]["name"] == "Only KFC"
+
+    # Verify with equivalent NOT EXISTS (inverted subquery) expression
+    not_exists_qs = (
+        GroupsByRestaurant.objects.filter(
+            ~Exists(subquery.filter(name=OuterRef("name")).exclude(restaurant="KFC"))
+        )
+        .values("name")
+        .distinct()
+    )
+    assert list(not_exists_qs) == list(only_groups_where_all_members_are_from_kfc)
 
 
 def test_different_operator():

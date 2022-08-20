@@ -2,7 +2,26 @@ ALL Subqueries
 ==============
 
 An [ALL subquery](https://www.postgresql.org/docs/current/functions-subquery.html#FUNCTIONS-SUBQUERY-ALL)
-is used to compare against subquery results and return true only if all rows satisfy the condition, false otherwise.
+is used to compare against subquery results and return true only if all rows satisfy the condition, false otherwise:
+
+
+```
+<operand> <operator> ALL (<subquery>)
+```
+
+The equivalent expression would be to use `NOT EXISTS` with an inverted subquery resultset:
+
+```
+NOT EXISTS (<inverted-subquery>)
+```
+
+where `<inverted-subquery>` inverts the `ALL` comparison logic, but not any correlating logic.
+
+The `ALL` syntax may be preferrable to avoid double-negatives.
+
+
+Example
+-------
 
 An example of where this can be useful is to filter a dataset where all rows of a uniquely-defined subset meet the same
 condition.
@@ -37,6 +56,10 @@ You can use an ALL subquery to get only groups where all members work for KFC:
  Only KFC
 (1 row)
 ```
+
+
+Django
+------
 
 You achieve this in Django by defining a [custom lookup](https://docs.djangoproject.com/en/dev/howto/custom-lookups/)
 that simply includes the `ALL` keyword along with the operator of choice. In fact any of the lookups using operators
