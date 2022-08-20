@@ -1,4 +1,6 @@
+from django.core.exceptions import EmptyResultSet
 from django.db import models
+from django.db.models import fields
 from django.db.models.lookups import (
     Exact,
     GreaterThan,
@@ -43,7 +45,7 @@ class AllMixin:
 
 
 @models.Field.register_lookup
-class All(AllMixin, Exact):
+class AllLookup(AllMixin, Exact):
     lookup_name = "all"
 
 
@@ -70,3 +72,45 @@ class LessThanlAll(AllMixin, LessThan):
 @models.Field.register_lookup
 class LessThanOrEqualAll(AllMixin, LessThanOrEqual):
     lookup_name = "lte_all"
+
+
+class All(models.Subquery):
+    # Identical to models.Exists with the line `query = self.query.exists(...)` removed!
+    template = "'t' = ALL (%(subquery)s)"
+    output_field = fields.BooleanField()
+
+    def __init__(self, queryset, negated=False, **kwargs):
+        self.negated = negated
+        super().__init__(queryset, **kwargs)
+
+    def __invert__(self):
+        clone = self.copy()
+        clone.negated = not self.negated
+        return clone
+
+    def as_sql(self, compiler, connection, template=None, **extra_context):
+        try:
+            sql, params = super().as_sql(
+                compiler,
+                connection,
+                template=template,
+                **extra_context,
+            )
+        except EmptyResultSet:
+            if self.negated:
+                features = compiler.connection.features
+                if not features.supports_boolean_expr_in_select_clause:
+                    return "1=1", ()
+                return compiler.compile(models.Value(True))
+            raise
+        if self.negated:
+            sql = "NOT {}".format(sql)
+        return sql, params
+
+    def select_format(self, compiler, sql, params):
+        # Wrap EXISTS() with a CASE WHEN expression if a database backend
+        # (e.g. Oracle) doesn't support boolean expression in SELECT or GROUP
+        # BY list.
+        if not compiler.connection.features.supports_boolean_expr_in_select_clause:
+            sql = "CASE WHEN {} THEN 1 ELSE 0 END".format(sql)
+        return sql, params

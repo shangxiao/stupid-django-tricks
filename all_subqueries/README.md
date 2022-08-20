@@ -105,4 +105,47 @@ WHERE 'KFC' = ALL (
 )
 ```
 
+
+Simplifying Filtering
+---------------------
+
+One can further refine the readability of the queryset filtering by creating a `Subquery` subclass similar
+to `Exists` that can work with subqueries that create boolean results in the vein of Python's `all()` builtin:
+
+```python
+class All(Subquery):
+    template = "'t' = ALL (%(subquery)s)"
+    output_field = fields.BooleanField()
+    # similar methods to Exists omitted
+
+class Employee(Model):
+    name = CharField()
+
+class Score(Model):
+    employee = ForeignKey(Employee)
+    score = models.IntegerField()
+
+Employee.objects.filter(
+    All(
+        Score.objects.filter(employee=OuterRef("id"))
+        .annotate(score_gte_10=Q(score__gte=10))
+        .values("score_gte_10")
+    )
+)
+```
+
+Resulting query:
+
+```
+SELECT "all_subqueries_employee"."id", "all_subqueries_employee"."name"
+FROM "all_subqueries_employee"
+WHERE 't' = ALL (
+    SELECT (U0."score" >= 10) AS "score_gte_10"
+    FROM "all_subqueries_score" U0
+    WHERE U0."employee_id" = ("all_subqueries_employee"."id")
+)
+```
+
+
 See [models.py](./models.py) and [tests.py](./tests.py) for more details.
+

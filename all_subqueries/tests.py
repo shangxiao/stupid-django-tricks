@@ -1,7 +1,7 @@
 import pytest
-from django.db.models import Exists, OuterRef, Subquery, Value
+from django.db.models import Exists, OuterRef, Q, Subquery, Value
 
-from .models import Employee, GroupsByRestaurant, Score
+from .models import All, Employee, GroupsByRestaurant, Score
 
 pytestmark = pytest.mark.django_db
 
@@ -67,3 +67,34 @@ def test_different_operator():
 
     assert len(top_scoring) == 1
     assert top_scoring[0].name == "Joe"
+
+
+def test_all_true():
+    bob = Employee.objects.create(name="Bob")
+    Score.objects.create(employee=bob, score=5)
+    Score.objects.create(employee=bob, score=10)
+    joe = Employee.objects.create(name="Joe")
+    Score.objects.create(employee=joe, score=10)
+    Score.objects.create(employee=joe, score=15)
+
+    top_scoring = Employee.objects.filter(
+        All(
+            Score.objects.filter(employee=OuterRef("id"))
+            .annotate(score_gte_10=Q(score__gte=10))
+            .values("score_gte_10")
+        )
+    )
+
+    assert len(top_scoring) == 1
+    assert top_scoring[0].name == "Joe"
+
+    # Verify negation
+    not_top_scoring = Employee.objects.filter(
+        ~All(
+            Score.objects.filter(employee=OuterRef("id"))
+            .annotate(score_gte_10=Q(score__gte=10))
+            .values("score_gte_10")
+        )
+    )
+    assert len(not_top_scoring) == 1
+    assert not_top_scoring[0].name == "Bob"
