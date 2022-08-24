@@ -76,6 +76,15 @@ The equivalent `NOT EXISTS` expression would be:
 ```
 
 
+Database Support
+----------------
+
+ - ✗ SQLite: No support, use `NOT EXISTS` equivalent
+ - ✓ [PostgreSQL](https://www.postgresql.org/docs/current/functions-subquery.html#FUNCTIONS-SUBQUERY-ALL)
+ - ✓ [MySQL](https://dev.mysql.com/doc/refman/8.0/en/all-subqueries.html)
+ - ✓ [SQL Server](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/all-transact-sql)
+
+
 Django
 ------
 
