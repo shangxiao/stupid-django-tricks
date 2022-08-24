@@ -57,6 +57,24 @@ You can use an ALL subquery to get only groups where all members work for KFC:
 (1 row)
 ```
 
+The equivalent `NOT EXISTS` expression would be:
+
+```
+# SELECT DISTINCT name
+  FROM groups g
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM groups g2
+    WHERE g2.restaurant != 'KFC'
+      AND g.name = g2.name
+  );
+
+   name
+----------
+ Only KFC
+(1 row)
+```
+
 
 Django
 ------
