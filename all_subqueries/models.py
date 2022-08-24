@@ -114,3 +114,13 @@ class All(models.Subquery):
         if not compiler.connection.features.supports_boolean_expr_in_select_clause:
             sql = "CASE WHEN {} THEN 1 ELSE 0 END".format(sql)
         return sql, params
+
+
+class AllWorkaround(models.Exists):
+    def __init__(self, queryset, correlating_filters=None, **kwargs):
+        where_node = queryset.query.where.clone()
+        where_node.negated = not where_node.negated
+        queryset.query.where.children = [where_node]
+        if correlating_filters:
+            queryset = queryset.filter(correlating_filters)
+        super().__init__(queryset, negated=True, **kwargs)

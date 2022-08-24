@@ -1,7 +1,7 @@
 import pytest
 from django.db.models import Exists, OuterRef, Q, Subquery, Value
 
-from .models import All, Employee, GroupsByRestaurant, Score
+from .models import All, AllWorkaround, Employee, GroupsByRestaurant, Score
 
 pytestmark = pytest.mark.django_db
 
@@ -98,3 +98,12 @@ def test_all_true():
     )
     assert len(not_top_scoring) == 1
     assert not_top_scoring[0].name == "Bob"
+
+    # Verify against workaround
+    workaround = Employee.objects.filter(
+        AllWorkaround(
+            queryset=Score.objects.filter(score__gte=10),
+            correlating_filters=Q(employee=OuterRef("id")),
+        )
+    )
+    assert list(workaround) == list(top_scoring)
