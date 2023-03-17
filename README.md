@@ -1,6 +1,6 @@
 # stupid-django-tricks
 
-![Tests](https://github.com/shangxiao/stupid-django-tricks/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/shangxiao/stupid-django-tricks/actions/workflows/lint_and_tests.yml/badge.svg)
 
 
 Various tricks with Django - some silly, some quite useful.

@@ -1,8 +1,43 @@
-name: Tests
+name: "Lint & Test"
 
 on: push
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  Lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Determine Python version
+        run: echo "PYTHON_VERSION=$(cat .python-version)" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Setup virtualenv
+        run: |
+          python3 -m venv ./.venv
+          source .venv/bin/activate
+
+      - name: Install dependencies
+        run: pip install -Ur ./requirements.txt
+
+      - name: Black
+        run: black --check .
+
+      - name: isort
+        run: isort --check .
+
+      - name: flake8
+        run: flake8  --exclude .venv
+
   Tests:
     runs-on: ubuntu-latest
 
