@@ -7,7 +7,6 @@ import generated_columns.models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []

@@ -4,7 +4,6 @@ from django.db import models
 
 
 class GeneratedColumnMixin:
-
     # This adds the field to the RETURNING clause of an INSERT. UPDATE is not supported.
     db_returning = True
 
