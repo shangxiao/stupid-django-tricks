@@ -11,3 +11,4 @@ Various tricks with Django - some silly, some quite useful.
 4. [Singleton Models](./singleton_models)
 5. [Generated Columns](./generated_columns)
 6. [ALL Subqueries](./all_subqueries)
+7. [Having Fun with Constraints](./abusing_constraints) 
