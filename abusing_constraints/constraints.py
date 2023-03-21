@@ -227,10 +227,15 @@ class View(BaseConstraint):
         if isinstance(query, str):
             self.query = query
         elif isinstance(query, QuerySet):
-            self.query = str(query.query)
+            self.query = self.render_query(query.query)
         else:
             raise TypeError("string or Query expected")
         self.is_materialized = is_materialized
+
+    def render_query(self, query):
+        sql, params = query.sql_with_params()
+        with connection.cursor() as cursor:
+            return cursor.mogrify(sql, params).decode("utf-8")
 
     def create_sql(self, model, schema_editor):
         if self.is_materialized:

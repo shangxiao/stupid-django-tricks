@@ -3,7 +3,15 @@ from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.utils import IntegrityError
 
-from abusing_constraints.models import ActiveDocument, Bar, Data, Document, Foo, Tenant
+from abusing_constraints.models import (
+    ActiveDocument,
+    ActiveDocumentByName,
+    Bar,
+    Data,
+    Document,
+    Foo,
+    Tenant,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -64,3 +72,7 @@ def test_view():
     active_document.refresh_from_db()
 
     assert active_document.name == "Active Document has been updated!"
+
+    active_document_by_name = ActiveDocumentByName.objects.first()
+
+    assert active_document_by_name.name == "Active Document has been updated!"

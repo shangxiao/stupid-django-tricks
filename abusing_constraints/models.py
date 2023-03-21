@@ -97,6 +97,10 @@ Document._meta.constraints += [
         name="active_documents",
         query=Document.objects.filter(is_archived=False).values("id", "name"),
     ),
+    View(
+        name="active_documents_by_name",
+        query=Document.objects.filter(name__icontains="active").values("id", "name"),
+    ),
 ]
 
 
@@ -105,4 +109,12 @@ class ActiveDocument(models.Model):
 
     class Meta:
         db_table = "active_documents"
+        managed = False
+
+
+class ActiveDocumentByName(models.Model):
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "active_documents_by_name"
         managed = False

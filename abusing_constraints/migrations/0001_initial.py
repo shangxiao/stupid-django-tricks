@@ -30,6 +30,25 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name="ActiveDocumentByName",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+            ],
+            options={
+                "db_table": "active_documents_by_name",
+                "managed": False,
+            },
+        ),
+        migrations.CreateModel(
             name="Bar",
             fields=[
                 (
@@ -118,6 +137,14 @@ class Migration(migrations.Migration):
                 is_materialized=False,
                 name="active_documents",
                 query='SELECT "abusing_constraints_document"."id", "abusing_constraints_document"."name" FROM "abusing_constraints_document" WHERE NOT "abusing_constraints_document"."is_archived"',
+            ),
+        ),
+        migrations.AddConstraint(
+            model_name="document",
+            constraint=abusing_constraints.constraints.View(
+                is_materialized=False,
+                name="active_documents_by_name",
+                query='SELECT "abusing_constraints_document"."id", "abusing_constraints_document"."name" FROM "abusing_constraints_document" WHERE UPPER("abusing_constraints_document"."name"::text) LIKE UPPER(\'%active%\')',
             ),
         ),
         migrations.AddConstraint(

@@ -10,7 +10,7 @@ Introduction to Constraints
 [Django constraints](https://docs.djangoproject.com/en/4.1/ref/models/constraints/) allow you to add different types of table-level database
 constraints to your models.
 
-Django currently supports check & unique constraints. Both of these extend from `BaseConstraint` which provide the 
+Django currently supports check & unique constraints. Both of these extend from `BaseConstraint` which provide the
 necessary hooks for forwards/reverse migrations, makemigrations as well as validation of constraints from model & form instances.
 
 A Django constraint follows this basic pattern:
@@ -87,7 +87,7 @@ class Bar(models.Model):
     foo = models.ForeignKey(Foo, ...)
 ```
 
-Adding an **extra** composite foreign key from `Bar` to `Foo`, with the tenant as part of the key, **enforces** tenant equality. ie 
+Adding an **extra** composite foreign key from `Bar` to `Foo`, with the tenant as part of the key, **enforces** tenant equality. ie
 the foreign key now prevents relationships from existing where Foo and Bar belong to different tenants.
 
 To do this 2 steps are required:
@@ -369,6 +369,8 @@ class View(BaseConstraint):
         if isinstance(query, str):
             self.query = query
         else:
+            # Better to parameterise correctly as __str__() just fills in placeholders
+            # without any correct quoting for strings, etc.
             self.query = str(query.query)
 
     def create_sql(self, model, schema_editor):
