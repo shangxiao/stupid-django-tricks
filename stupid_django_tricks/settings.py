@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "abusing_constraints",
+    "column_check_constraints",
     "all_subqueries",
     "generated_columns",
     "singleton_models",
