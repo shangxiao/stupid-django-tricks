@@ -70,5 +70,14 @@ class CheckedIntegerField(ColumnCheckMixin, models.IntegerField):
     ...
 
 
+def mix(*classes):
+    class_name = "".join(cls.__name__ for cls in classes)
+    new_class = type(class_name, classes, {})
+    globals()[class_name] = new_class
+    return new_class
+
+
 class Project(models.Model):
-    percentage = CheckedIntegerField(check=Q(percentage__gte=0, percentage__lte=100))
+    percentage = mix(ColumnCheckMixin, models.IntegerField)(
+        check=Q(percentage__gte=0, percentage__lte=100)
+    )

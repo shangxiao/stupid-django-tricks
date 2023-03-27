@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "percentage",
-                    column_check_constraints.models.CheckedIntegerField(
+                    column_check_constraints.models.ColumnCheckMixinIntegerField(
                         check=models.Q(("percentage__gte", 0), ("percentage__lte", 100))
                     ),
                 ),
