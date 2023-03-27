@@ -7,9 +7,11 @@ from abusing_constraints.models import (
     ActiveDocument,
     ActiveDocumentByName,
     Bar,
+    Child,
     Data,
     Document,
     Foo,
+    Parent,
     Tenant,
 )
 
@@ -76,3 +78,13 @@ def test_view():
     active_document_by_name = ActiveDocumentByName.objects.first()
 
     assert active_document_by_name.name == "Active Document has been updated!"
+
+
+def test_database_level_cascading_deletes():
+    parent = Parent.objects.create()
+    child = Child.objects.create(parent=parent)
+
+    parent.delete()
+
+    with pytest.raises(Child.DoesNotExist):
+        child.refresh_from_db()

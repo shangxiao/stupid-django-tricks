@@ -1,7 +1,13 @@
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
 
-from abusing_constraints.constraints import Callback, ForeignKeyConstraint, RawSQL, View
+from abusing_constraints.constraints import (
+    BasicForeignKeyConstraint,
+    Callback,
+    ForeignKeyConstraint,
+    RawSQL,
+    View,
+)
 
 
 class Tenant(models.Model):
@@ -118,3 +124,22 @@ class ActiveDocumentByName(models.Model):
     class Meta:
         db_table = "active_documents_by_name"
         managed = False
+
+
+class Parent(models.Model):
+    ...
+
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        constraints = [
+            BasicForeignKeyConstraint(
+                name="native_on_delete",
+                columns=["parent_id"],
+                to_table="abusing_constraints_parent",
+                to_columns=["id"],
+                on_delete="CASCADE",
+            ),
+        ]

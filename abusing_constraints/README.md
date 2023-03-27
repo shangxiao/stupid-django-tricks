@@ -104,7 +104,7 @@ class Foo(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=["id", "tenant"], ...)
+            UniqueConstraint(columns=["id", "tenant"], ...)
         ]
 
 class Bar(models.Model):
@@ -114,15 +114,16 @@ class Bar(models.Model):
     class Meta:
         constraints = [
             ForeignKeyConstraint(
-                fields=["foo_id", "tenant_id"],
+                columns=["foo_id", "tenant_id"],
                 to_table="abusing_constraints_foo",
-                to_fields=["id", "tenant_id"],
+                to_columns=["id", "tenant_id"],
                 ...
             ),
         ]
 ```
 
-This new foreign key constraint is a simple extension of `BaseConstraint`:
+This new foreign key constraint is a simple extension of `BaseConstraint` (note this is a simple implementation without
+any proper quoting of names, etc for demonstration purposes):
 
 ```python
 class ForeignKeyConstraint(BaseConstraint):
@@ -130,15 +131,19 @@ class ForeignKeyConstraint(BaseConstraint):
         self,
         *,
         name,
-        fields,
+        columns,
         to_table,
-        to_fields,
+        to_columns,
+        on_delete=None,
+        on_update=None,
         violation_error_message=None,
     ):
         super().__init__(name, violation_error_message=violation_error_message)
-        self.fields = fields
+        self.columns = columns
         self.to_table = to_table
-        self.to_fields = to_fields
+        self.to_columns = to_columns
+        self.on_delete = on_delete
+        self.on_update = on_update
 
     def create_sql(self, model, schema_editor):
         table = model._meta.db_table
@@ -150,19 +155,21 @@ class ForeignKeyConstraint(BaseConstraint):
         return f"ALTER TABLE {table} DROP CONSTRAINT {self.name}"
 
     def constraint_sql(self, model, schema_editor):
-        columns = ", ".join(self.fields)
-        to_columns = ", ".join(self.to_fields)
-        return f"FOREIGN KEY ({columns}) REFERENCES {self.to_table} ({to_columns})"
+        columns = ", ".join(self.columns)
+        to_columns = ", ".join(self.to_columns)
+        on_delete = f"ON DELETE {self.on_delete}" if self.on_delete else ""
+        on_update = f"ON UPDATE {self.on_update}" if self.on_update else ""
+        return f"FOREIGN KEY ({columns}) REFERENCES {self.to_table} ({to_columns}) {on_delete} {on_update}"
 
     def validate(self, model, instance, exclude=None, using=DEFAULT_DB_ALIAS):
         with connection.cursor() as cursor:
             # to keep things simple assume each field doesn't have a separate column name
             where_clause = " AND ".join(
-                f"{field} = %({field})s" for field in self.to_fields
+                f"{field} = %({field})s" for field in self.to_columns
             )
             params = {
-                field: getattr(instance, self.fields[i])
-                for i, field in enumerate(self.to_fields)
+                field: getattr(instance, self.columns[i])
+                for i, field in enumerate(self.to_columns)
             }
             table = self.to_table
             cursor.execute(f"SELECT count(*) FROM {table} WHERE {where_clause}", params)
@@ -175,18 +182,51 @@ class ForeignKeyConstraint(BaseConstraint):
             return (
                 self.name == other.name
                 and self.violation_error_message == other.violation_error_message
-                and self.fields == other.fields
+                and self.columns == other.columns
                 and self.to_table == other.to_table
-                and self.to_fields == other.to_fields
+                and self.to_columns == other.to_columns
+                and self.on_delete == other.on_delete
+                and self.on_update == other.on_update
             )
         return super().__eq__(other)
 
     def deconstruct(self):
         path, args, kwargs = super().deconstruct()
         kwargs["to_table"] = self.to_table
-        kwargs["fields"] = self.fields
-        kwargs["to_fields"] = self.to_fields
+        kwargs["columns"] = self.columns
+        kwargs["to_columns"] = self.to_columns
+        kwargs["on_delete"] = self.on_delete
+        kwargs["on_update"] = self.on_update
         return path, args, kwargs
+```
+
+
+Database-Level Cascading Deletes
+--------------------------------
+
+Notice in the `ForeignKeyConstraint` class above I made provision for cascading updates & deletes - if you wish to have
+database-level cascades implemented you can use this supplementary foreign key to do that:
+
+ 1. Specify `DO_NOTHING` for the main ForeignKey
+ 2. Add the supplementary foreign key specifying database-level cascades
+
+```python
+class Parent(models.Model):
+    ...
+
+class Child(models.Model):
+    parent = models.ForeignKey(Parent, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        constraints = [
+            ForeignKeyConstraint(
+                name="native_on_delete",
+                columns=["parent_id"],
+                to_table="abusing_constraints_parent",
+                to_columns=["id"],
+                on_delete="CASCADE",
+            ),
+        ]
 ```
 
 
