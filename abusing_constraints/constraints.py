@@ -7,6 +7,7 @@ from django.db import connection
 from django.db.backends.ddl_references import Columns, Statement, Table
 from django.db.models import Model, Q
 from django.db.models.constraints import BaseConstraint
+from django.db.models.fields.related import resolve_relation
 from django.db.models.query import QuerySet
 from django.db.utils import DEFAULT_DB_ALIAS
 
@@ -103,15 +104,11 @@ class ForeignKeyConstraint(BaseConstraint):
         self.deferrable = deferrable
 
     def get_to_model(self, from_model):
-        if isinstance(self.to_model, str):
-            if "." in self.to_model:
-                app_label, to_model_name = self.to_model.split(".")
-            else:
-                app_label = from_model._meta.app_label
-                to_model_name = self.to_model
-            return apps.get_model(app_label, to_model_name)
-        else:
-            return self.to_model
+        return (
+            apps.get_model(resolve_relation(from_model, self.to_model))
+            if isinstance(self.to_model, str)
+            else self.to_model
+        )
 
     def create_sql(self, model, schema_editor):
         sql = schema_editor.sql_create_fk
