@@ -163,12 +163,12 @@ class ForeignKeyConstraint(BaseConstraint):
         filters = [
             Q(
                 **{
-                    model._meta.get_field(field_name).target_field.name: self.get_value(
+                    to_model._meta.get_field(self.to_fields[i]).name: self.get_value(
                         getattr(instance, field_name)
                     )
                 }
             )
-            for field_name in self.fields
+            for i, field_name in enumerate(self.fields)
         ]
         if not queryset.filter(*filters).exists():
             raise ValidationError(self.get_violation_error_message())
