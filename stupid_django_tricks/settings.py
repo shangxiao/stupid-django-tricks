@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "custom_joins",
     "abusing_constraints",
     "column_check_constraints",
     "all_subqueries",
