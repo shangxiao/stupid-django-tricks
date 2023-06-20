@@ -1,4 +1,4 @@
-Django==4.1
+Django==4.2.2
 dj-database-url==1.2.0
 psycopg2==2.9.3
 pytest==7.2.2

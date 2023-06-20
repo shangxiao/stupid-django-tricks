@@ -1,6 +1,6 @@
-from django.core.exceptions import EmptyResultSet
 from django.db import models
 from django.db.models import fields
+from django.db.models.expressions import NegatedExpression
 from django.db.models.lookups import (
     Exact,
     GreaterThan,
@@ -79,48 +79,12 @@ class All(models.Subquery):
     template = "'t' = ALL (%(subquery)s)"
     output_field = fields.BooleanField()
 
-    def __init__(self, queryset, negated=False, **kwargs):
-        self.negated = negated
-        super().__init__(queryset, **kwargs)
 
-    def __invert__(self):
-        clone = self.copy()
-        clone.negated = not self.negated
-        return clone
-
-    def as_sql(self, compiler, connection, template=None, **extra_context):
-        try:
-            sql, params = super().as_sql(
-                compiler,
-                connection,
-                template=template,
-                **extra_context,
-            )
-        except EmptyResultSet:
-            if self.negated:
-                features = compiler.connection.features
-                if not features.supports_boolean_expr_in_select_clause:
-                    return "1=1", ()
-                return compiler.compile(models.Value(True))
-            raise
-        if self.negated:
-            sql = "NOT {}".format(sql)
-        return sql, params
-
-    def select_format(self, compiler, sql, params):
-        # Wrap EXISTS() with a CASE WHEN expression if a database backend
-        # (e.g. Oracle) doesn't support boolean expression in SELECT or GROUP
-        # BY list.
-        if not compiler.connection.features.supports_boolean_expr_in_select_clause:
-            sql = "CASE WHEN {} THEN 1 ELSE 0 END".format(sql)
-        return sql, params
-
-
-class AllWorkaround(models.Exists):
+class AllWorkaround(NegatedExpression):
     def __init__(self, queryset, correlating_filters=None, **kwargs):
         where_node = queryset.query.where.clone()
         where_node.negated = not where_node.negated
         queryset.query.where.children = [where_node]
         if correlating_filters:
             queryset = queryset.filter(correlating_filters)
-        super().__init__(queryset, negated=True, **kwargs)
+        super().__init__(models.Exists(queryset, **kwargs))

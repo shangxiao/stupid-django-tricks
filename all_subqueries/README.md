@@ -143,7 +143,6 @@ to `Exists` that can work with subqueries that create boolean results in the vei
 class All(Subquery):
     template = "'t' = ALL (%(subquery)s)"
     output_field = fields.BooleanField()
-    # similar methods to Exists omitted
 
 class Employee(Model):
     name = CharField()
