@@ -1,5 +1,3 @@
-from datetime import date, datetime
-
 from django.db import models
 from django.db.models.expressions import BaseExpression, Ref
 from django.db.models.lookups import Exact
@@ -40,12 +38,14 @@ class GenerateSeriesJoin:
         self.parent_alias = parent_alias
 
     def as_sql(self, compiler, connection):
-        params = [self.start, self.stop, self.step]
+        start, start_params = self.start.as_sql(compiler, connection)
+        stop, stop_params = self.stop.as_sql(compiler, connection)
+        params = [self.step]
         join_clause, join_params = self.join_clause.as_sql(compiler, connection)
         alias = connection.ops.quote_name(self.table_alias)
         return (
-            f"RIGHT OUTER JOIN generate_series(%s, %s, %s) {alias} ON ({join_clause})",
-            params + join_params,
+            f"RIGHT OUTER JOIN generate_series({start}, {stop}, %s) {alias} ON ({join_clause})",
+            list(start_params) + list(stop_params) + params + join_params,
         )
 
 
@@ -58,20 +58,17 @@ class GenerateSeriesConditionalExpression(BaseExpression):
     output_field = models.BooleanField()
 
     def __init__(self, *, start, stop, step, join_condition, alias="series"):
-        self.start = start
-        self.stop = stop
+        self.start = (
+            models.Value(start) if not hasattr(start, "resolve_expression") else start
+        )
+        self.stop = (
+            models.Value(stop) if not hasattr(stop, "resolve_expression") else stop
+        )
         self.step = step
         self.join_condition = join_condition
         self.alias = alias
 
-        # bother to check that start, stop & step are all consistent types?
-
-        if isinstance(self.start, datetime):
-            self.output_field = models.DateTimeField()
-        elif isinstance(self.start, date):
-            self.output_field = models.DateField()
-        else:
-            self.output_field = models.IntegerField()
+        self.output_field = self.start.output_field
 
         for expr in self.join_condition.flatten():
             if isinstance(expr, SeriesRef):
@@ -83,8 +80,8 @@ class GenerateSeriesConditionalExpression(BaseExpression):
     ):
         query.join(
             GenerateSeriesJoin(
-                start=self.start,
-                stop=self.stop,
+                start=self.start.resolve_expression(query),
+                stop=self.stop.resolve_expression(query),
                 step=self.step,
                 join_clause=self.join_condition.resolve_expression(query),
                 alias=self.alias,
@@ -104,22 +101,19 @@ class GenerateSeries(SeriesRef):
     """
 
     def __init__(self, *, start, stop, step, join_condition, alias="series"):
-        self.start = start
-        self.stop = stop
+        self.start = (
+            models.Value(start) if not hasattr(start, "resolve_expression") else start
+        )
+        self.stop = (
+            models.Value(stop) if not hasattr(stop, "resolve_expression") else stop
+        )
         self.step = step
         self.join_condition = join_condition
         self.alias = alias
         # default_alias is what Django uses to determine the aggregations added to annotate()
         self.default_alias = alias
 
-        # bother to check that start, stop & step are all consistent types?
-
-        if isinstance(self.start, datetime):
-            self.output_field = models.DateTimeField()
-        elif isinstance(self.start, date):
-            self.output_field = models.DateField()
-        else:
-            self.output_field = models.IntegerField()
+        self.output_field = self.start.output_field
 
         for expr in self.join_condition.flatten():
             if isinstance(expr, SeriesRef):
@@ -131,8 +125,8 @@ class GenerateSeries(SeriesRef):
     ):
         query.join(
             GenerateSeriesJoin(
-                start=self.start,
-                stop=self.stop,
+                start=self.start.resolve_expression(query),
+                stop=self.stop.resolve_expression(query),
                 step=self.step,
                 join_clause=self.join_condition.resolve_expression(query),
                 alias=self.alias,
