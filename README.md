@@ -14,3 +14,4 @@ Various tricks with Django - some silly, some quite useful.
 7. [Having Fun with Constraints](./abusing_constraints)
 8. [Column Check Constraints](./column_check_constraints)
 9. [Custom Joins](./custom_joins)
+10. [ROLLUP](./grouping_sets)

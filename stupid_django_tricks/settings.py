@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "grouping_sets",
     "custom_joins",
     "abusing_constraints",
     "column_check_constraints",
