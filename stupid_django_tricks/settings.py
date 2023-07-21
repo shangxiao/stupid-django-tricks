@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "unregistered_models",
     "subqueries_as_lateral_joins",
     "grouping_sets",
     "custom_joins",
