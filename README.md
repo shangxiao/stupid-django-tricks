@@ -18,3 +18,4 @@ Various tricks with Django - some silly, some quite useful.
 11. [Subqueries as Lateral Joins](./subqueries_as_lateral_joins)
 12. [Unregistered Models](./unregistered_models)
 13. [Management Command Aliases](./management_command_alias)
+14. [QuerySet Cartesian Products](./queryset_cartesian_product)
