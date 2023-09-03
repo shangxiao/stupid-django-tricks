@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "querysets_as_subqueries",
     "queryset_cartesian_product",
     "unregistered_models",
     "subqueries_as_lateral_joins",
