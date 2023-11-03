@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "array_icontains",
     "annotation_overwrite",
     "custom_sequences",
     "querysets_as_subqueries",

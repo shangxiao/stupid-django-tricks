@@ -21,3 +21,4 @@ Various tricks with Django - some silly, some quite useful.
 14. [QuerySet Cartesian Products](./queryset_cartesian_product)
 15. [Custom Sequences](./custom_sequences)
 16. [Overwriting Model Fields with Annotations](./annotation_overwrite)
+17. [Array icontains Lookup](./array_icontains)
