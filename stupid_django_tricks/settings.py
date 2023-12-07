@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "xor_function",
     "array_icontains",
     "annotation_overwrite",
     "custom_sequences",

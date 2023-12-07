@@ -22,3 +22,4 @@ Various tricks with Django - some silly, some quite useful.
 15. [Custom Sequences](./custom_sequences)
 16. [Overwriting Model Fields with Annotations](./annotation_overwrite)
 17. [Array icontains Lookup](./array_icontains)
+18. [Xor function](./xor_function)
