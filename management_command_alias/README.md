@@ -10,7 +10,7 @@ A simple way to add management command aliases can be to simply map the argv inp
 ```python
 def alias_map(argv):
     if len(argv) > 1:
-        argv[1:2] = [settings.COMMAND_ALIASES.get(argv[1], argv[1])]
+        argv[1:2] = settings.COMMAND_ALIASES.get(argv[1], argv[1]).split(" ")
     return argv
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ then in your settings:
 
 ```python
 COMMAND_ALIASES = {
-    "mm": "makemigrations",
+    "mm": "makemigrations --no-header",
     "sp": "shell_plus",
 }
 ```
