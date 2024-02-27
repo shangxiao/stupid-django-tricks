@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "negative_indexing_querysets",
     "xor_function",
     "array_icontains",
     "annotation_overwrite",
