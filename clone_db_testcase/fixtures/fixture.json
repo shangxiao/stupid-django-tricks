@@ -1,0 +1,7 @@
+[
+    {
+        "model": "clone_db_testcase.domainwhitelist",
+        "pk": "python.org",
+        "fields": {}
+    }
+]

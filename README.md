@@ -24,3 +24,4 @@ Various tricks with Django - some silly, some quite useful.
 17. [Array icontains Lookup](./array_icontains)
 18. [Xor function](./xor_function)
 19. [Negative Indexing QuerySets](./negative_indexing_querysets)
+20. [CloneDbTestCase](./clone_db_testcase)
