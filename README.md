@@ -25,3 +25,4 @@ Various tricks with Django - some silly, some quite useful.
 18. [Xor function](./xor_function)
 19. [Negative Indexing QuerySets](./negative_indexing_querysets)
 20. [CloneDbTestCase](./clone_db_testcase)
+21. [Additional Code Formatters](./isort_migrations)
