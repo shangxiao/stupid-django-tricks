@@ -1,0 +1,4 @@
+#!/bin/sh
+
+python -m black $*
+isort --force-single-line "${*:3}"
