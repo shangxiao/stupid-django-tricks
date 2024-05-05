@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bulk create</title>
+    <style></style>
+  </head>
+
+  <body>
+    <h1>Bulk create</h1>
+    <form method="POST">
+      {% csrf_token %}
+      {{ formset.management_form }}
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+        {% for form in formset %}
+          <tr>
+            <td valign="top">
+              {{ form.name }}
+              {% for error in form.name.errors %}
+                <br /><span style="color:firebrick">{{ error }}</span>
+              {% endfor %}
+            </td>
+            <td valign="top">
+              {{ form.email }}
+              {% for error in form.email.errors %}
+                <br /><span style="color:firebrick">{{ error }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+      <button>Save</button>
+      <button name="add-row" formnovalidate>Add row</button>
+    </form>
+  </body>
+</html>

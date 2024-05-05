@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bulk create</title>
+    <style></style>
+  </head>
+
+  <body>
+    <h1>Bulk create</h1>
+    <form method="POST">
+      {% csrf_token %}
+      {{ formset.management_form }}
+      <table id="form-table">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+        {% for form in formset %}
+          <tr>
+            <td valign="top">
+              {{ form.name }}
+              {% for error in form.name.errors %}
+                <br /><span style="color:firebrick">{{ error }}</span>
+              {% endfor %}
+            </td>
+            <td valign="top">
+              {{ form.email }}
+              {% for error in form.email.errors %}
+                <br /><span style="color:firebrick">{{ error }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+      <template id="new-row">
+        <tr>
+          <td valign="top">
+            {{ formset.empty_form.name }}
+          </td>
+          <td valign="top">
+            {{ formset.empty_form.email }}
+          </td>
+        </tr>
+      </template>
+      <button>Save</button>
+      <button name="add-row" type="button" onclick="addRow()">Add row</button>
+      <script>
+        function addRow() {
+          // get the current number of rows from the "management form"
+          const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+          // clone the template containing the "empty form" and append it to the formset table
+          const newRow = document.getElementById('new-row').content.cloneNode(true);
+          newRow.querySelectorAll('[name*="__prefix__"]').forEach(el => {
+            el.name = el.name.replace("__prefix__", totalForms.value);
+          });
+          document.getElementById('form-table').appendChild(newRow);
+
+          // increment the management form's record of rows
+          totalForms.value = parseInt(totalForms.value) + 1;
+        }
+      </script>
+    </form>
+  </body>
+</html>
