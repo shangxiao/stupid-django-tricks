@@ -35,6 +35,23 @@ def bulk_create_users(request):
 
     elif request.method == "POST":
         formset = UserFormSet(data=request.POST)
+
+        num_populated_forms = sum(
+            filter(
+                None,
+                (
+                    all(
+                        request.POST.get(f"form-{i}-{field_name}", "") != ""
+                        for field_name in UserFormSet.form.base_fields
+                    )
+                    for i in range(int(request.POST["form-TOTAL_FORMS"]))
+                ),
+            )
+        )
+        if num_populated_forms >= 1:
+            for form in formset:
+                form.empty_permitted = True
+
         if formset.is_valid():
             formset.save()
             users = [form.instance for form in formset.forms]

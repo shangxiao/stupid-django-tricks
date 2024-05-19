@@ -198,6 +198,40 @@ def bulk_create_users(request):
     return render(request, "bulk_create_form/bulk_create.html", {"formset": formset})
 ```
 
+One final addition we can make to improve this: Currently if a user enters values part-way down the formset instead of
+the first row, the form will think that the minimum number of forms has not been entered. This is because `FormSet`
+simply sets the first `min_num` forms to have `empty_permitted=False` without any additional analysis or processing
+during form validation.
+
+We can change this behaviour by manually checking whether the user has entered the minimum number of forms then enabling
+all forms to `empty_permitted=True` before validation takes place:
+
+```python
+    ...
+
+    elif request.method == "POST":
+        formset = UserFormSet(data=request.POST)
+
+        num_populated_forms = sum(
+            filter(
+                None,
+                (
+                    all(
+                        request.POST.get(f"form-{i}-{field_name}", "") != ""
+                        for field_name in UserFormSet.form.base_fields
+                    )
+                    for i in range(int(request.POST["form-TOTAL_FORMS"]))
+                ),
+            )
+        )
+        if num_populated_forms >= 1:
+            for form in formset:
+                form.empty_permitted = True
+
+        if formset.is_valid():
+            ... continue processing ...
+```
+
 
 JavaScript Managed Dynamic Formset
 ----------------------------------
