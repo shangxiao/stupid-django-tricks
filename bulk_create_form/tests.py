@@ -63,6 +63,31 @@ def test_formset_post__min_required__5_forms(client):
     ]
 
 
+def test_formset_post__min_required__midway__valid(client):
+    # make sure that a record posted midway down the formset is still valid
+    response = client.post(
+        "/bulk_create_form/",
+        data={
+            "form-TOTAL_FORMS": 5,
+            "form-INITIAL_FORMS": 0,
+            "form-MIN_NUM_FORMS": 1,
+            "form-MAX_NUM_FORMS": 1000,
+            "form-0-name": "",
+            "form-0-email": "",
+            "form-1-name": "valid",
+            "form-1-email": "valid@valid.com",
+        },
+    )
+
+    assert response.status_code == 200
+    assert list(User.objects.values("name", "email").order_by("name")) == [
+        {
+            "name": "valid",
+            "email": "valid@valid.com",
+        },
+    ]
+
+
 def test_formset_post__invalid_email(client):
     response = client.post(
         "/bulk_create_form/",
