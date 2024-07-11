@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "func_as_constraint",
     "clone_db_testcase",
     "negative_indexing_querysets",
     "xor_function",

@@ -27,3 +27,4 @@ Various tricks with Django - some silly, some quite useful.
 20. [CloneDbTestCase](./clone_db_testcase)
 21. [Additional Code Formatters](./isort_migrations)
 22. [Bulk Create Form](./bulk_create_form)
+23. [Custom Funcs as Constraints](./func_as_constraint)
