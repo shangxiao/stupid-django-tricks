@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "func_as_constraint",
     "bulk_create_form",
     "isort_migrations",
     "clone_db_testcase",
