@@ -1,7 +1,6 @@
 import marshal
 import types
 
-from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.backends.ddl_references import Columns, Statement, Table
@@ -104,11 +103,11 @@ class ForeignKeyConstraint(BaseConstraint):
         self.deferrable = deferrable
 
     def get_to_model(self, from_model):
-        return (
-            apps.get_model(resolve_relation(from_model, self.to_model))
-            if isinstance(self.to_model, str)
-            else self.to_model
-        )
+        model_name_or_model = resolve_relation(from_model, self.to_model)
+        if isinstance(model_name_or_model, str):
+            apps = from_model._meta.apps
+            return apps.get_model(model_name_or_model)
+        return model_name_or_model
 
     def create_sql(self, model, schema_editor):
         sql = schema_editor.sql_create_fk
@@ -141,7 +140,7 @@ class ForeignKeyConstraint(BaseConstraint):
         table = schema_editor.connection.ops.quote_name(model._meta.db_table)
         name = schema_editor.quote_name(self.name)
         return Statement(
-            schema_editor.sql_delete_fk,
+            "ALTER TABLE %(table)s DROP CONSTRAINT IF EXISTS %(name)s",
             table=table,
             name=name,
         )
@@ -187,7 +186,18 @@ class ForeignKeyConstraint(BaseConstraint):
 
     def deconstruct(self):
         path, args, kwargs = super().deconstruct()
-        kwargs["to_model"] = self.to_model
+
+        # We can't just serialiser a reference to a class, must use the str format
+        # The following is borrowed from ForeignObject
+        if isinstance(self.to_model, str):
+            if "." in self.to_model:
+                app_label, model_name = self.to_model.split(".")
+                kwargs["to_model"] = "%s.%s" % (app_label, model_name.lower())
+            else:
+                kwargs["to_model"] = self.to_model.lower()
+        else:
+            kwargs["to_model"] = self.to_model._meta.label_lower
+
         kwargs["fields"] = self.fields
         kwargs["to_fields"] = self.to_fields
         kwargs["deferrable"] = self.deferrable
