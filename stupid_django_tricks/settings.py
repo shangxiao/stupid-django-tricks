@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "pg_cron",
     "count_subquery",
     "func_as_constraint",
     "bulk_create_form",
