@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "pg_cron",
+    "combine_date_time",
     "count_subquery",
     "func_as_constraint",
     "bulk_create_form",
