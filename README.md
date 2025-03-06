@@ -30,3 +30,4 @@ Various tricks with Django - some silly, some quite useful.
 23. [Custom Funcs as Constraints](./func_as_constraint)
 24. [Count Subquery](./count_subquery)
 25. [Combining Date & Time with PostgreSQL](./combine_date_time)
+26. [Specific Ordering](./specific_ordering)
