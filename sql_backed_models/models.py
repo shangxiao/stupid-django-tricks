@@ -81,8 +81,8 @@ class VirtualTableManager(models.Manager):
         parent_alias = None
         filtered_relation = None
 
-        def __init__(self, alias, query, params=None):
-            self.table_name = alias
+        def __init__(self, table_name, alias, query, params=None):
+            self.table_name = table_name
             self.alias = alias
             self.query = query
             self.params = params
@@ -105,11 +105,21 @@ class VirtualTableManager(models.Manager):
             else:
                 return query, self.params
 
+        def relabeled_clone(self, change_map):
+            return self.__class__(
+                self.table_name,
+                change_map.get(self.table_alias, self.table_alias),
+                self.query,
+                self.params,
+            )
+
     def get_queryset(self):
         qs = super().get_queryset()
         query = textwrap.dedent(self._query or self.model.query)
         qs.query.join(
-            VirtualTableManager.VirtualTable(self.get_alias(), query, self._params)
+            VirtualTableManager.VirtualTable(
+                self.get_alias(), self.get_alias(), query, self._params
+            )
         )
         return qs
 

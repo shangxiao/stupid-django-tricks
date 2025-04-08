@@ -1,8 +1,14 @@
 from datetime import date, datetime, timedelta, timezone
 
 import pytest
+from django.db.models import Exists, OuterRef
 
-from .models import GenerateDateSeries, GenerateDateTimeSeries, GenerateIntegerSeries
+from .models import (
+    BetterGenerateIntegerSeries,
+    GenerateDateSeries,
+    GenerateDateTimeSeries,
+    GenerateIntegerSeries,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -58,3 +64,19 @@ def test_better_integer_series():
     ).all()
 
     assert [obj.series for obj in int_series] == [2, 4, 6, 8, 10]
+
+
+def test_as_subquery():
+    int_series = (
+        BetterGenerateIntegerSeries.objects.params(start=1, stop=10, interval=1)
+        .all()
+        .filter(
+            Exists(
+                BetterGenerateIntegerSeries.objects.params(
+                    start=2, stop=4, interval=1
+                ).filter(series=OuterRef("series"))
+            )
+        )
+    )
+
+    assert [obj.series for obj in int_series] == [2, 3, 4]
