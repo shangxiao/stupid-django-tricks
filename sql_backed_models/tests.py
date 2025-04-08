@@ -50,3 +50,11 @@ def test_datetime_series():
     assert datetime_series[1].timestamptz == datetime(2020, 1, 1, 10, 0, 0, tzinfo=utc)
     assert datetime_series[6].timestamptz == datetime(2020, 1, 1, 15, 0, 0, tzinfo=utc)
     assert datetime_series[7].timestamptz == datetime(2020, 1, 1, 16, 0, 0, tzinfo=utc)
+
+
+def test_better_integer_series():
+    int_series = BetterGenerateIntegerSeries.objects.params(
+        start=2, stop=10, interval=2
+    ).all()
+
+    assert [obj.series for obj in int_series] == [2, 4, 6, 8, 10]

@@ -137,7 +137,7 @@ class BetterGenerateIntegerSeries(models.Model):
 
     series = models.IntegerField(primary_key=True)
 
-    query = "generate_series(%s, %s, %s) series"
+    query = "SELECT * FROM generate_series(%(start)s, %(stop)s, %(interval)s) series"
 
     class Meta:
         managed = False
