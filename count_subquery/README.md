@@ -39,3 +39,18 @@ class CountSubquery(Subquery):
 
 Author.objects.annotate(num_publications=CountSubquery(Publication.objects.filter(author=OuterRef("pk"))))
 ```
+
+If you wish to use `COUNT(*)` instead of the primary key then you can utilise Django's `Star()` expression:
+
+```python
+class CountSubquery(models.Subquery):
+    def __init__(self, queryset, **kwargs):
+        super().__init__(
+            queryset.values(
+                _=models.Func(
+                    Star(), function="COUNT", output_field=models.IntegerField()
+                )
+            ),
+            **kwargs,
+        )
+```
