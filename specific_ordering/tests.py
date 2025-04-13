@@ -2,6 +2,8 @@ import pytest
 from django.db.models import Case, OrderBy, Q, When
 from django.db.models.expressions import Func
 
+from specific_ordering.models import OrderByValue
+
 from .models import Order
 
 pytestmark = pytest.mark.django_db
@@ -79,6 +81,25 @@ def test_specific_order_with_array_position(orders):
             "status",
             function="array_position",
         )
+    )
+
+    assert list(orders.values("product", "status")) == [
+        {"product": "Heavy-Duty Cordless Power Drill", "status": "IN_PROGRESS"},
+        {"product": "ProSeries Wireless Earbuds", "status": "IN_PROGRESS"},
+        {"product": "Smart LED Desk Lamp with USB Charging", "status": "PAID"},
+        {"product": "Luxury Cotton Bath Towel Set", "status": "PAID"},
+        {"product": "Premium Leather Crossbody Bag", "status": "SHIPPED"},
+        {"product": "Sleek Stainless Steel Coffee Maker", "status": "SHIPPED"},
+        {"product": "Foldable Portable Laptop Stand", "status": "DELIVERED"},
+        {"product": "Eco-Friendly Bamboo Toothbrush Set", "status": "DELIVERED"},
+        {"product": "Bluetooth Fitness Tracker Watch", "status": "DELIVERED"},
+        {"product": "UltraComfort Memory Foam Mattress", "status": "DELIVERED"},
+    ]
+
+
+def test_specific_order_with_order_by_class(orders):
+    orders = Order.objects.order_by(
+        OrderByValue("status", ["IN_PROGRESS", "PAID", "SHIPPED", "DELIVERED"])
     )
 
     assert list(orders.values("product", "status")) == [

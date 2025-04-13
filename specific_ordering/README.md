@@ -41,4 +41,18 @@ FROM orders
 ORDER BY array_position({'IN_PROGRESS', 'PAID', 'SHIPPED', 'DELIVERED'}, status)
 ```
 
+Using the `array_position()` approach we can bundle that up into a neat little readable subclass of `OrderBy`:
+
+```python
+class ArrayPosition(Func):
+    function = "array_position"
+    output_field = IntegerField()
+
+class OrderByValue(OrderBy):
+    def __init__(self, field, order, *args, **kwargs):
+        super().__init__(ArrayPosition(order, field), *args, **kwargs)
+
+Order.objects.order_by(OrderByValue("status", ["IN_PROGRESS", "PAID", "SHIPPED", "DELIVERED"]))
+```
+
 Checkout the [tests](./tests.py) to see how this is done in Django.
