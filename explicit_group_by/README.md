@@ -29,7 +29,15 @@ Customising QuerySet, SQLCompiler for Explicit Grouping
 
 It's possible to customise Django so that you can define an `group_by()` method on querysets, which enables an "explicit
 grouping" mode to manually declare how you want `GROUP BY` to be defined, whilst also leave the legacy implicit grouping
-behaviour to remain if `group_by()` is not used.
+behaviour to remain if `group_by()` is not used, for eg:
+
+```python
+# legacy mode
+Product.objects.values("name").annotate(total=Count("*")).values("name", "total").order_by("-total")
+
+# explicit group by mode
+Product.objects.group_by("name").values("name", total=Count("*")).order_by("-total")
+```
 
 In order to do this the legacy behaviour would need to be bypassed if this new `group_by()` method is called:
  - The `Query.group_by` attribute will be one of either:
@@ -41,11 +49,11 @@ In order to do this the legacy behaviour would need to be bypassed if this new `
  - `SQLCompiler.get_group_by()`: the method called to construct the `GROUP BY` using `Query.group_by` as per above.
 
 This means that a custom solution will need:
- - A custom `QuerySet` that provides the `group_by()` interface
- - A custom `Query` that the queryset uses during its initialisation.  It will need to:
+ 1. A custom `QuerySet` that provides the `group_by()` interface
+ 2. A custom `Query` that the queryset uses during its initialisation.  It will need to:
    - Define its own attribute for storing requested group references & expressions
    - Bypass the default behaviour (necessary??) in `set_group_by()`
- - A custom `SQLCompiler`. At this point in time there's no way to separate the grouping influencing behaviour from the
+ 3. A custom `SQLCompiler`. At this point in time there's no way to separate the grouping influencing behaviour from the
    automated inferencing behaviour in `get_group_by()` which means overriding the method and copying parts of the
    default implementation that helps with reference resolution & expression compilation, etc.
 
