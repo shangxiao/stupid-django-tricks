@@ -43,14 +43,11 @@ class MyCompiler(SQLCompiler):
 
         # adapted from super().get_group_by()
         # but with the auto select, order, etc fetching *removed*
-
-        # still needed?
-        if self.query.group_by is None:
-            return []
+        # and query.group_by references replaced with query._group_by
 
         expressions = []
         group_by_refs = set()
-        for expr in self.query.group_by:
+        for expr in self.query._group_by:
             if not hasattr(expr, "as_sql"):
                 expr = self.query.resolve_ref(expr)
             if isinstance(expr, Ref):
@@ -91,7 +88,7 @@ class MyCompiler(SQLCompiler):
         return result
 
         # do nothing except use the query's group by
-        return [self.compile(expr.get_group_by_cols()) for expr in self.query.group_by]
+        return [self.compile(expr.get_group_by_cols()) for expr in self.query._group_by]
 
 
 class MyQuery(Query):
@@ -111,21 +108,25 @@ class MyQuery(Query):
         # note the switched order
         return MyCompiler(self, connection, using, elide_empty)
 
-    @property
-    def group_by(self):
-        return self._group_by
+    # @property
+    # def group_by(self):
+    #     if self._group_by:
+    #         return self._group_by
+    #     else:
+    #         return super().group_by
 
-    @group_by.setter
-    def group_by(self, value):
-        if value is True:
-            self.is_group_by_required = True
-        pass
+    # @group_by.setter
+    # def group_by(self, value):
+    #     super().group_by = value
+    #     # if value is True:
+    #     #     self.is_group_by_required = True
+    #     # pass
 
-    def set_group_by(self, allow_aliases=True):
-        pass
-        # breakpoint()
-        # if not self.manual_group_by:
-        #     super().set_group_by(allow_aliases)
+    # def set_group_by(self, allow_aliases=True):
+    #     pass
+    #     # breakpoint()
+    #     # if not self.manual_group_by:
+    #     #     super().set_group_by(allow_aliases)
 
     def chain(self, klass=None):
         obj = super().chain(klass)

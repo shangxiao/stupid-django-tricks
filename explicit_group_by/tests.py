@@ -48,6 +48,24 @@ def products():
     )
 
 
+def test_foo(products):
+    print()
+    print()
+    print("***************")
+    print()
+
+    print(Product.objects.all().query)
+
+    print()
+    print("***************")
+    print()
+    print()
+
+
+def test_no_group_by(products):
+    assert "GROUP BY" not in str(Product.objects.all().query)
+
+
 def test_legacy_group_by(products):
     results = (
         Product.objects.values("name")
