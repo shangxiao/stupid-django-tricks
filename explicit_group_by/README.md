@@ -11,13 +11,14 @@ we may find ourselves not understanding the queries it's producing underneath. T
 
 
 There are a few behaviours that happen magically:
- - When an expression containing an aggregate is added to a queryset, via annotation or values, [it will signal](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1692-L1698) to the compiler during evaluation to construct a
-   `GROUP BY` clause. It will [include anything that is to be added to the `SELECT` clause](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L137-L163) as well as any [ordering
-   specified via `order_by()`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L164-L169) or `Meta.ordering` (check)
- - Django allows influencing what it includes in the `GROUP BY`, by using the values-annotate-values pattern to include
-   expressions or fields added in the intial values call.
- - Django may try to [reduce `GROUP BY` expressions down to a functional equivalent by primary key](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L198-L228), if supported by the
-   database
+ - Querysets will [automatically flag](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1692-L1698) that a `GROUP BY` must be constructed when an expression containing an aggregate is added via annotation or values
+ - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-annotate-values pattern
+ - The compiler will compile a list of items for the `GROUP BY` from:
+   - The influenced items
+   - Any [additional items in the `SELECT` clause as determined by the final values](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L137-L163)
+   - Any [additional items in the `ORDER BY` clause as determined by `order_by()` or `Meta.ordering`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L164-L169)
+ - Django may try to [reduce `GROUP BY` expressions down to a functional equivalent by primary key](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L198-L228),
+   if supported by the database
  - Django may also try to [replace expressions with an ordinal reference to an expression declared in the `SELECT`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L185-L189), also
    if supported by the database
 
