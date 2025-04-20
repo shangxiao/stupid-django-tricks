@@ -12,7 +12,8 @@ we may find ourselves not understanding the queries it's producing underneath. T
 
 There are a few behaviours that happen magically:
  - Querysets will [automatically flag](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1692-L1698) that a `GROUP BY` must be constructed when an expression containing an aggregate is added via annotation or values
- - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-before-annotate-aggregation pattern (arguable an anti-pattern due to the overloading of what `values()` is used for)
+ - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-before-annotate-aggregation pattern (arguable an anti-pattern due to the overloading of what `values()` is used for? perhaps not if you view `values()` as a way to select and returning
+   dictionaires is just the appropriate container for that)
  - The compiler will compile a list of items for the `GROUP BY` from:
    - The influenced items
    - Any [additional items in the `SELECT` clause as determined by the final values](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L137-L163)
@@ -21,6 +22,9 @@ There are a few behaviours that happen magically:
    if supported by the database
  - Django may also try to [replace expressions with an ordinal reference to an expression declared in the `SELECT`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L185-L189), also
    if supported by the database
+
+Note that any kind of aggregation requires a call to `values()` which returns the results as dictionaries.  This fits with the shape of the data returned where
+each record does not correspond to a model instance.
 
 Django does not yet understand that ...
 
