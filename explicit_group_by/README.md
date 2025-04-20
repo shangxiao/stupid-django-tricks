@@ -24,6 +24,8 @@ There are a few behaviours that happen magically:
 
 Django does not yet understand that ...
 
+The source of the confusion is ... (values overloaded - it does 3 things: sets up a dict iterator, sets the SELECT, inflences GROUP BY)
+
 
 Legacy Behaviour
 ----------------
@@ -97,17 +99,23 @@ Product.objects.values("name").annotate(total=Count("*")).order_by("store")
 Customising QuerySet, SQLCompiler for Explicit Grouping
 -------------------------------------------------------
 
-It's possible to customise Django so that you can define an `group_by()` method on querysets, which enables an "explicit
-grouping" mode to manually declare how you want `GROUP BY` to be defined, whilst also leave the legacy implicit grouping
-behaviour to remain if `group_by()` is not used, for eg:
+It's possible to setup an explicit group by mode like so:
 
 ```python
 # legacy mode
-Product.objects.values("name").annotate(total=Count("*")).values("name", "total").order_by("-total")
+Product.objects.values("name").annotate(total=Count("*")).order_by("-total")
 
 # explicit group by mode
 Product.objects.group_by("name").values("name", total=Count("*")).order_by("-total")
 ```
+
+Here 
+
+
+customise Django so that you can define an `group_by()` method on querysets, which enables an "explicit
+grouping" mode to manually declare how you want `GROUP BY` to be defined, whilst also leave the legacy implicit grouping
+behaviour to remain if `group_by()` is not used, for eg:
+
 
 In order to do this the legacy behaviour would need to be bypassed if this new `group_by()` method is called:
  - The `Query.group_by` attribute will be one of either:
