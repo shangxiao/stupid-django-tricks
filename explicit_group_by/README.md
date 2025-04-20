@@ -12,17 +12,63 @@ we may find ourselves not understanding the queries it's producing underneath. T
 
 There are a few behaviours that happen magically:
  - Querysets will [automatically flag](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1692-L1698) that a `GROUP BY` must be constructed when an expression containing an aggregate is added via annotation or values
- - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-annotate-values pattern
+ - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-annotate pattern (arguable an anti-pattern due to the overloading of what `values()` is used for)
  - The compiler will compile a list of items for the `GROUP BY` from:
    - The influenced items
    - Any [additional items in the `SELECT` clause as determined by the final values](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L137-L163)
-   - Any [additional items in the `ORDER BY` clause as determined by `order_by()` or `Meta.ordering`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L164-L169)
+   - Any [additional items in the `ORDER BY` clause as determined by `order_by()` **but excluding** `Meta.ordering`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L164-L169)
  - Django may try to [reduce `GROUP BY` expressions down to a functional equivalent by primary key](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L198-L228),
    if supported by the database
  - Django may also try to [replace expressions with an ordinal reference to an expression declared in the `SELECT`](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L185-L189), also
    if supported by the database
 
 Django does not yet understand that ...
+
+
+Legacy Behaviour
+----------------
+
+Here are some examples of how `GROUP BY` is constructed:
+
+annotation of aggregate with `allows_group_by_selected_pks` turned off
+```python
+connection.features.allows_group_by_selected_pks = False
+Product.objects.annotate(total=Count("*"))
+
+> SELECT "explicit_group_by_product"."id", "explicit_group_by_product"."name", "explicit_group_by_product"."store_id", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."id", "explicit_group_by_product"."name", "explicit_group_by_product"."store_id"
+```
+
+annotation of aggregate with `allows_group_by_selected_pks` turned on
+```python
+connection.features.allows_group_by_selected_pks = True
+Product.objects.annotate(total=Count("*"))
+
+> SELECT "explicit_group_by_product"."id", "explicit_group_by_product"."name", "explicit_group_by_product"."store_id", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."id"
+```
+
+values-annotate with `allows_group_by_select_index` turned off
+```python
+connection.features.allows_group_by_select_index = False
+Product.objects.values("name").annotate(total=Count("*"))
+
+> SELECT "explicit_group_by_product"."name" AS "name", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."name"
+```
+
+values-annotate with `allows_group_by_select_index` turned on
+```python
+connection.features.allows_group_by_select_index = True
+Product.objects.values("name").annotate(total=Count("*"))
+
+> SELECT "explicit_group_by_product"."name" AS "name", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY 1
+```
+
+`order_by()` affecting the group by
+```python
+Product.objects.values("name").annotate(total=Count("*")).order_by("store")
+
+> SELECT "explicit_group_by_product"."name" AS "name", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."name", "explicit_group_by_product"."store_id" ORDER BY "explicit_group_by_product"."store_id" ASC
+```
+
 
 
 Customising QuerySet, SQLCompiler for Explicit Grouping
