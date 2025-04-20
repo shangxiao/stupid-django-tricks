@@ -35,7 +35,14 @@ annotation of aggregate with `allows_group_by_selected_pks` turned off
 connection.features.allows_group_by_selected_pks = False
 Product.objects.annotate(total=Count("*"))
 
-> SELECT "explicit_group_by_product"."id", "explicit_group_by_product"."name", "explicit_group_by_product"."store_id", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."id", "explicit_group_by_product"."name", "explicit_group_by_product"."store_id"
+> SELECT "explicit_group_by_product"."id",
+         "explicit_group_by_product"."name",
+         "explicit_group_by_product"."store_id",
+         COUNT(*) AS "total"
+  FROM "explicit_group_by_product"
+  GROUP BY "explicit_group_by_product"."id",
+           "explicit_group_by_product"."name",
+           "explicit_group_by_product"."store_id"
 ```
 
 annotation of aggregate with `allows_group_by_selected_pks` turned on
@@ -43,7 +50,12 @@ annotation of aggregate with `allows_group_by_selected_pks` turned on
 connection.features.allows_group_by_selected_pks = True
 Product.objects.annotate(total=Count("*"))
 
-> SELECT "explicit_group_by_product"."id", "explicit_group_by_product"."name", "explicit_group_by_product"."store_id", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."id"
+> SELECT "explicit_group_by_product"."id",
+         "explicit_group_by_product"."name",
+         "explicit_group_by_product"."store_id",
+         COUNT(*) AS "total"
+  FROM "explicit_group_by_product"
+  GROUP BY "explicit_group_by_product"."id"
 ```
 
 values-annotate with `allows_group_by_select_index` turned off
@@ -51,7 +63,10 @@ values-annotate with `allows_group_by_select_index` turned off
 connection.features.allows_group_by_select_index = False
 Product.objects.values("name").annotate(total=Count("*"))
 
-> SELECT "explicit_group_by_product"."name" AS "name", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."name"
+> SELECT "explicit_group_by_product"."name" AS "name",
+         COUNT(*) AS "total"
+  FROM "explicit_group_by_product"
+  GROUP BY "explicit_group_by_product"."name"
 ```
 
 values-annotate with `allows_group_by_select_index` turned on
@@ -59,14 +74,22 @@ values-annotate with `allows_group_by_select_index` turned on
 connection.features.allows_group_by_select_index = True
 Product.objects.values("name").annotate(total=Count("*"))
 
-> SELECT "explicit_group_by_product"."name" AS "name", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY 1
+> SELECT "explicit_group_by_product"."name" AS "name",
+         COUNT(*) AS "total"
+  FROM "explicit_group_by_product"
+  GROUP BY 1
 ```
 
 `order_by()` affecting the group by
 ```python
 Product.objects.values("name").annotate(total=Count("*")).order_by("store")
 
-> SELECT "explicit_group_by_product"."name" AS "name", COUNT(*) AS "total" FROM "explicit_group_by_product" GROUP BY "explicit_group_by_product"."name", "explicit_group_by_product"."store_id" ORDER BY "explicit_group_by_product"."store_id" ASC
+> SELECT "explicit_group_by_product"."name" AS "name",
+         COUNT(*) AS "total"
+  FROM "explicit_group_by_product"
+  GROUP BY "explicit_group_by_product"."name",
+           "explicit_group_by_product"."store_id"
+  ORDER BY "explicit_group_by_product"."store_id" ASC
 ```
 
 
