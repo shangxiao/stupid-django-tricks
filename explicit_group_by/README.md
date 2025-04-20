@@ -12,7 +12,7 @@ we may find ourselves not understanding the queries it's producing underneath. T
 
 There are a few behaviours that happen magically:
  - Querysets will [automatically flag](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1692-L1698) that a `GROUP BY` must be constructed when an expression containing an aggregate is added via annotation or values
- - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-annotate pattern (arguable an anti-pattern due to the overloading of what `values()` is used for)
+ - Django [allows influencing](https://github.com/django/django/blob/5.2/django/db/models/query.py#L1696-L1697) what fields or expressions can go into the `GROUP BY` via the values-before-annotate-aggregation pattern (arguable an anti-pattern due to the overloading of what `values()` is used for)
  - The compiler will compile a list of items for the `GROUP BY` from:
    - The influenced items
    - Any [additional items in the `SELECT` clause as determined by the final values](https://github.com/django/django/blob/5.2/django/db/models/sql/compiler.py#L137-L163)
