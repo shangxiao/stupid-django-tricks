@@ -30,6 +30,13 @@ class BasicForeignKeyConstraint(BaseConstraint):
         self.on_delete = on_delete
         self.on_update = on_update
 
+    def constraint_sql(self, model, schema_editor):
+        columns = ", ".join(self.columns)
+        to_columns = ", ".join(self.to_columns)
+        on_delete = f"ON DELETE {self.on_delete}" if self.on_delete else ""
+        on_update = f"ON UPDATE {self.on_update}" if self.on_update else ""
+        return f"FOREIGN KEY ({columns}) REFERENCES {self.to_table} ({to_columns}) {on_delete} {on_update}"
+
     def create_sql(self, model, schema_editor):
         table = model._meta.db_table
         constraint_sql = self.constraint_sql(model, schema_editor)
@@ -38,13 +45,6 @@ class BasicForeignKeyConstraint(BaseConstraint):
     def remove_sql(self, model, schema_editor):
         table = model._meta.db_table
         return f"ALTER TABLE {table} DROP CONSTRAINT {self.name}"
-
-    def constraint_sql(self, model, schema_editor):
-        columns = ", ".join(self.columns)
-        to_columns = ", ".join(self.to_columns)
-        on_delete = f"ON DELETE {self.on_delete}" if self.on_delete else ""
-        on_update = f"ON UPDATE {self.on_update}" if self.on_update else ""
-        return f"FOREIGN KEY ({columns}) REFERENCES {self.to_table} ({to_columns}) {on_delete} {on_update}"
 
     def validate(self, model, instance, exclude=None, using=DEFAULT_DB_ALIAS):
         with connection.cursor() as cursor:
@@ -109,8 +109,13 @@ class ForeignKeyConstraint(BaseConstraint):
             return apps.get_model(model_name_or_model)
         return model_name_or_model
 
-    def create_sql(self, model, schema_editor):
-        sql = schema_editor.sql_create_fk
+    def constraint_sql(self, model, schema_editor):
+        _, _, sql_after_add = schema_editor.sql_create_fk.partition("ADD")
+        sql_create_fk = sql_after_add.lstrip()
+        return self.create_sql(model, schema_editor, sql_create_fk=sql_create_fk)
+
+    def create_sql(self, model, schema_editor, sql_create_fk=None):
+        sql = sql_create_fk or schema_editor.sql_create_fk
         table = Table(model._meta.db_table, schema_editor.quote_name)
         name = schema_editor.quote_name(self.name)
         column_names = [
@@ -144,11 +149,6 @@ class ForeignKeyConstraint(BaseConstraint):
             table=table,
             name=name,
         )
-
-    def constraint_sql(self, model, schema_editor):
-        # It's unclear whether this is ever actually used.... it's called from the CreateModel operation however
-        # constraints are added in a separate operation AddConstraint.
-        return None
 
     def get_value(self, value):
         # Deal with allowing either field name referring to the related object or the foreign key value
@@ -210,14 +210,14 @@ class RawSQL(BaseConstraint):
         self.sql = sql
         self.reverse_sql = reverse_sql
 
+    def constraint_sql(self, model, schema_editor):
+        raise Exception("RawSQL must be added after model creation")
+
     def create_sql(self, model, schema_editor):
         return self.sql
 
     def remove_sql(self, model, schema_editor):
         return self.reverse_sql
-
-    def constraint_sql(self, model, schema_editor):
-        return None
 
     def validate(self, *args, **kwargs):
         return True
@@ -254,6 +254,9 @@ class View(BaseConstraint):
         with connection.cursor() as cursor:
             return cursor.mogrify(sql, params).decode("utf-8")
 
+    def constraint_sql(self, model, schema_editor):
+        raise Exception("View must be added after model creation")
+
     def create_sql(self, model, schema_editor):
         if self.is_materialized:
             remove_sql = self.remove_sql(model, schema_editor)
@@ -264,9 +267,6 @@ class View(BaseConstraint):
     def remove_sql(self, model, schema_editor):
         qualifier = "MATERIALIZED" if self.is_materialized else ""
         return f"DROP {qualifier} VIEW IF EXISTS {self.name} CASCADE"
-
-    def constraint_sql(self, model, schema_editor):
-        return None
 
     def validate(self, *args, **kwargs):
         return True
@@ -299,6 +299,9 @@ class Callback(BaseConstraint):
             else reverse_callback
         )
 
+    def constraint_sql(self, model, schema_editor):
+        raise Exception("Callback must be added after model creation")
+
     def create_sql(self, model, schema_editor):
         code = marshal.loads(self.callback)
         forwards = types.FunctionType(code, globals(), "forwards")
@@ -308,9 +311,6 @@ class Callback(BaseConstraint):
         code = marshal.loads(self.reverse_callback)
         reverse = types.FunctionType(code, globals(), "reverse")
         reverse(model, schema_editor)
-
-    def constraint_sql(self, model, schema_editor):
-        return None
 
     def validate(self, *args, **kwargs):
         return True
