@@ -23,7 +23,7 @@ class BasicForeignKeyConstraint(BaseConstraint):
         on_update=None,
         violation_error_message=None,
     ):
-        super().__init__(name, violation_error_message=violation_error_message)
+        super().__init__(name=name, violation_error_message=violation_error_message)
         self.columns = columns
         self.to_table = to_table
         self.to_columns = to_columns
@@ -96,7 +96,7 @@ class ForeignKeyConstraint(BaseConstraint):
         deferrable=None,
         violation_error_message=None,
     ):
-        super().__init__(name, violation_error_message=violation_error_message)
+        super().__init__(name=name, violation_error_message=violation_error_message)
         self.fields = fields
         self.to_model = to_model
         self.to_fields = to_fields
@@ -206,7 +206,7 @@ class ForeignKeyConstraint(BaseConstraint):
 
 class RawSQL(BaseConstraint):
     def __init__(self, *, name, sql, reverse_sql):
-        super().__init__(name)
+        super().__init__(name=name)
         self.sql = sql
         self.reverse_sql = reverse_sql
 
@@ -240,7 +240,7 @@ class RawSQL(BaseConstraint):
 
 class View(BaseConstraint):
     def __init__(self, *, name, query, is_materialized=False):
-        super().__init__(name)
+        super().__init__(name=name)
         if isinstance(query, str):
             self.query = query
         elif isinstance(query, QuerySet):
@@ -289,7 +289,7 @@ class View(BaseConstraint):
 
 class Callback(BaseConstraint):
     def __init__(self, *, name, callback, reverse_callback):
-        super().__init__(name)
+        super().__init__(name=name)
         self.callback = (
             marshal.dumps(callback.__code__) if callable(callback) else callback
         )
