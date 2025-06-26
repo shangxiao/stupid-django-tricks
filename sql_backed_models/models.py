@@ -91,7 +91,7 @@ class VirtualTableManager(models.Manager):
             # Here's the magic: present the query as a sub-query where Django normally places the table name
             query = f"({self.query}) {self.alias}"
 
-            if type(self.params) == dict:
+            if type(self.params) is dict:
                 try:
                     # XXX mogrify dictionary params as Django only handles flat iterables
                     with connection.cursor() as cursor:
