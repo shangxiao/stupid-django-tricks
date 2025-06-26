@@ -85,7 +85,7 @@ class VirtualTableManager(models.Manager):
             self.table_name = table_name
             self.alias = alias
             self.query = query
-            self.params = params
+            self.params = params or []
 
         def as_sql(self, compiler, connection):
             # Here's the magic: present the query as a sub-query where Django normally places the table name
