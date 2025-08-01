@@ -31,3 +31,4 @@ Various tricks with Django - some silly, some quite useful.
 24. [Count Subquery](./count_subquery)
 25. [Combining Date & Time with PostgreSQL](./combine_date_time)
 26. [Specific Ordering](./specific_ordering)
+27. [Array ANY](./array_any)
