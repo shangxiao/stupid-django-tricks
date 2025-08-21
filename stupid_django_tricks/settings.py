@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "pg_copy",
     "pg_cron",
     "specific_ordering",
     "combine_date_time",
