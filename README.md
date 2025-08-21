@@ -2,8 +2,12 @@
 
 ![Tests](https://github.com/shangxiao/stupid-django-tricks/actions/workflows/lint_and_tests.yml/badge.svg)
 
-
 Various tricks with Django - some silly, some quite useful.
+
+<p align="center">
+  <img src="stupid_pet_tricks.png" alt="Stupid Pet Tricks" style="zoom: 0.3" />
+</p>
+
 
 1. [Add attributes to properties](./lookup_expr)
 2. [Custom SQL-backed models](./sql_backed_models)
