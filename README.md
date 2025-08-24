@@ -37,3 +37,4 @@ Various tricks with Django - some silly, some quite useful.
 26. [Specific Ordering](./specific_ordering)
 27. [Array ANY](./array_any)
 28. [Fast CSV Exports with COPY](./pg_copy)
+29. [Count Estimate](./count_estimate)
