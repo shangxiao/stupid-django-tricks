@@ -12,10 +12,12 @@ Custom Postgres session params:
    - ref: https://www.postgresql.org/docs/current/runtime-config-custom.html
  - These are a way to pass application users to feature like RLS or RLS-like views as an alternative to the
    `current_user` placeholder.
+ - Parameters cannot be "removed", only reset to empty string (as in `RESET <param>`)
+   - ref: https://stackoverflow.com/a/50929568
  - Parameters are only either global to the session or isolated to a transaction, meaning that some manual resetting
    will be required if setting within transactions is required.
     - ref: https://www.postgresql.org/docs/current/sql-set.html
- - Both session & local parameters are reset upon errors (rollback transaction AND savepoints)
+ - Both session & local parameters are reset to prior values upon errors (rollback transaction AND savepoints)
  - Since this feature wasn't really designed for general purpose parameter usage and the rather limited isolation, one
    need to take extreme care when using for security related features.
 
