@@ -57,6 +57,10 @@ def set_config_3(param, value):
         raise RuntimeError("Must be within atomic")
 
     with connection.cursor() as cursor:
+        if value is None or value == "":
+            cursor.execute("select set_config(%s, '', true)", [param])
+            return
+
         cursor.execute("select current_setting(%s, true)", [param])
         curr_value = cursor.fetchone()[0]
         if curr_value == str(value):
@@ -145,6 +149,15 @@ def test_set_config_3_in_tx():
         with connection.cursor() as cursor:
             cursor.execute("select current_setting('app.user', true)::int")
             assert cursor.fetchone()[0] == 35
+
+        # allow clearing
+        set_config_3("app.user", None)
+
+        with connection.cursor() as cursor:
+            cursor.execute("select current_setting('app.user', true)")
+            assert cursor.fetchone()[0] == ""
+
+        set_config_3("app.user", 35)
 
         # ignore if same value
         set_config_3("app.user", 35)
