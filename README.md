@@ -39,3 +39,4 @@ Various tricks with Django - some silly, some quite useful.
 28. [Fast CSV Exports with COPY](./pg_copy)
 29. [Count Estimate](./count_estimate)
 30. [Custom Postgres Parameters as a Context Manager](./set_config)
+31. [YesNo Function](./yesno)

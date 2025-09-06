@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "yesno",
     "set_config",
     "count_estimate",
     "pg_copy",
