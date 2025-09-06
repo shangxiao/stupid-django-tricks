@@ -40,7 +40,7 @@ class YesNo(Func):
 class ChoiceDisplay(Func):
     output_field = CharField()
 
-    def __init__(self, choices, *args, **kwargs):
+    def __init__(self, *args, choices, **kwargs):
         self.template = "CASE"
         self.template += "".join(
             [f" WHEN %(expressions)s = '{key}' THEN '{val}'" for key, val in choices]
@@ -79,7 +79,9 @@ def export(request):
             "Price": F("price"),
             "Currency": F("currency"),
             "Stock Quantity": F("stock_qty"),
-            "Availability": ChoiceDisplay(Product.Availability.choices, "availability"),
+            "Availability": ChoiceDisplay(
+                "availability", choices=Product.Availability.choices
+            ),
             "Is Active?": YesNo("is_active"),
             "Last Updated": ToChar(
                 AtTimeZone("updated_at", timezone="Hongkong"),
