@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "db_views",
     "yesno",
     "set_config",
     "count_estimate",
