@@ -40,3 +40,4 @@ Various tricks with Django - some silly, some quite useful.
 29. [Count Estimate](./count_estimate)
 30. [Custom Postgres Parameters as a Context Manager](./set_config)
 31. [YesNo Function](./yesno)
+32. [JSONBAgg as a Subquery](./jsonb_agg_subquery)

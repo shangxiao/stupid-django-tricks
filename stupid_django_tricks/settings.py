@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jsonb_agg_subquery",
     "db_views",
     "yesno",
     "set_config",
