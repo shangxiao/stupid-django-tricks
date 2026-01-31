@@ -41,3 +41,4 @@ Various tricks with Django - some silly, some quite useful.
 30. [Custom Postgres Parameters as a Context Manager](./set_config)
 31. [YesNo Function](./yesno)
 32. [JSONBAgg as a Subquery](./jsonb_agg_subquery)
+33. [Mocking now() within PostgreSQL](./mock_now)

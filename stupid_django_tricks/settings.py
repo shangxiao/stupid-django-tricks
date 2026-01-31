@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "mock_now",
     "jsonb_agg_subquery",
     "db_views",
     "yesno",
